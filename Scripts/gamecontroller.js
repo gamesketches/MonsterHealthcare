@@ -7,8 +7,11 @@ function GameController() {
     var frameCount;
     var that = this;
     
+    this.publicity = 0;
     this.secondsElapsed = 0;
     this.gold = 150;
+    this.curedCount = 0;
+    this.deceasedCount = 0;
     
     this.init = function(canvasController) {
         canvas = canvasController;
@@ -26,7 +29,7 @@ function GameController() {
     
     function updateAndDraw() {
         frameCount++;
-        console.log(frameCount, that.secondsElapsed);
+       // console.log(frameCount, that.secondsElapsed);
         if (frameCount == fps) {
             frameCount = 0;
             that.secondsElapsed++;
@@ -36,29 +39,31 @@ function GameController() {
         }
         canvas.clear();
         background.draw(canvas);
-        for (var i=0; i<operatingRooms.length; i++) {
-            operatingRooms[i].update();
-            operatingRooms[i].draw(canvas);
-        }
         var monsterIdxToRemove = [];
         for (var i=0; i<monsters.length; i++) {
             result = monsters[i].update();
             if (result) {
                 if (result.dead) {
                     monsterIdxToRemove.push(i);
-                    operatingRooms[0].isOccupied = false;
                     var newMonster = Monster.monsterFromRandom(monsters[i].getPos());
                     monsters.push(newMonster);
+                    that.deceasedCount ++;
                 }
                 else if (result.healed) {
                     monsterIdxToRemove.push(i);
                     /////!!!!!!!
-                    operatingRooms[0].isOccupied = false;
+                    operatingRooms[0].changeDoors(false);
+                    that.curedCount ++;
                 }
             }
         }
         for (var i=monsterIdxToRemove.length-1; i>=0; i--) {
             monsters.splice(monsterIdxToRemove[i], 1);
+        }
+        
+        // Drawing
+        for (var i=0; i<operatingRooms.length; i++) {
+            operatingRooms[i].draw(canvas);
         }
         for (var i=0; i<monsters.length; i++) {
             monsters[i].draw(canvas);
@@ -75,7 +80,6 @@ function GameController() {
             if (Util.pointInObject(pos.x,pos.y,operatingRooms[i],0) && !operatingRooms[i].isOccupied) {
                 for (var j=0; j<monsters.length; j++) {
                     if (monsters[j].isSelected) {
-                        operatingRooms[i].changeDoors(true);
                         var newMonster = Monster.monsterFromRandom(monsters[j].getPos());
                         monsters[j].goToRoom(operatingRooms[i], i);
                         monsters.push(newMonster);

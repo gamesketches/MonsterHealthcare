@@ -9,22 +9,6 @@ function OperatingRoom(data) {
     this.isOccupied = false;
     
     if (data) {
-        imgUnselected = ImageResources.images[data.race][data.illness]["unselected"];
-        imgSelected = ImageResources.images[data.race][data.illness]["selected"];
-        //switch (data.type) {
-        //    case "dragon":
-        //        imgUnselected = ImageResources.images["dragon"]["unselected"];
-        //        imgSelected = ImageResources.images["dragon"]["selected"];
-        //        break;
-        //    case "vampire":
-        //        imgUnselected = ImageResources.images["vampire"]["unselected"];
-        //        imgSelected = ImageResources.images["vampire"]["selected"];
-        //        break;
-        //    case "werewolf":
-        //        imgUnselected = ImageResources.images["werewolf"]["unselected"];
-        //        imgSelected = ImageResources.images["werewolf"]["selected"];
-        //        break;
-        //}
     }
     else {
         imgOpen = openimg;
@@ -34,8 +18,8 @@ function OperatingRoom(data) {
     var width = 350;
     var height = 200;
     var pos = {
-        x:data?data.x:400,
-        y:data?data.y:350
+        x:data?data.x:300,
+        y:data?data.y:300
     }
     var boundingBox = {
         left:0,
@@ -44,10 +28,6 @@ function OperatingRoom(data) {
         bottom:height
     };
     
-    this.update = function() {
-        //pos.x++;
-       // pos.y++;
-    }
     this.draw = function(canvas) {
         if (isOpen) {
             canvas.drawImg(imgOpen, pos.x, pos.y);
@@ -67,7 +47,7 @@ function OperatingRoom(data) {
     }
     this.changeDoors = function(open) {
         isOpen = open;
-	    
+	this.isOccupied = open;
     }
 }
 

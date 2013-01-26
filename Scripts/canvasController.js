@@ -4,9 +4,9 @@ function CanvasController(canvas) {
     this.clear = function() {
         context.clearRect(0,0,canvas.width, canvas.height);
     }
-    this.drawImg = function(img,x,y,width,height) {
+    this.drawImg = function(img,x,y,sx,sy,width,height,swidth,sheight) {
         if (width) {
-            context.drawImage(img,x,y, width, height);
+            context.drawImage(img,sx,sy,swidth,sheight,x,y,width,height);
         }
         else {
             context.drawImage(img,x,y);

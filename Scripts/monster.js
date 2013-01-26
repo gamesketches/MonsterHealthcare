@@ -14,22 +14,9 @@ function Monster(data) {
     if (data) {
         imgUnselected = ImageResources.images[data.race][data.illness]["unselected"];
         imgSelected = ImageResources.images[data.race][data.illness]["selected"];
-        hp = 10;
-        maxHp = 10;
-        //switch (data.type) {
-        //    case "dragon":
-        //        imgUnselected = ImageResources.images["dragon"]["unselected"];
-        //        imgSelected = ImageResources.images["dragon"]["selected"];
-        //        break;
-        //    case "vampire":
-        //        imgUnselected = ImageResources.images["vampire"]["unselected"];
-        //        imgSelected = ImageResources.images["vampire"]["selected"];
-        //        break;
-        //    case "werewolf":
-        //        imgUnselected = ImageResources.images["werewolf"]["unselected"];
-        //        imgSelected = ImageResources.images["werewolf"]["selected"];
-        //        break;
-        //}
+        hp = data.hp;
+        maxHp = data.maxHp;
+        costToTreat = data.cost;
     }
     else {
         imgUnselected = ImageResources.images["vampire"]["unselected"];
@@ -54,18 +41,18 @@ function Monster(data) {
     
     this.update = function() {
         frameCount++;
-        console.log("Monster frame count " + frameCount + " hp " + hp);
+        //console.log("Monster frame count " + frameCount + " hp " + hp);
         if (frameCount == fps) {
             frameCount = 0;
             if (!isInRoom) {
-                hp--;
+                hp -= 5;
                 if (hp <= 0) {
                     // DIE
                     return {dead:true};
                 }
             }
             else {
-                hp += 2;
+                hp += 10;
                 if (hp > maxHp) {
                     // HEAL
                     return {healed:true};
@@ -81,7 +68,9 @@ function Monster(data) {
         else {
             canvas.drawImg(imgUnselected, pos.x, pos.y);
         }
-        canvas.drawImg(ImageResources.images["health"], pos.x, pos.y, healthWidth*hp/maxHp, healthHeight);
+        canvas.drawImg(ImageResources.images["health"], pos.x, pos.y, 0, 0, healthWidth*hp/maxHp, healthHeight, healthWidth*hp/maxHp, healthHeight);
+   //canvas.drawImg(ImageResources.images["health"], pos.x+healthWidth*(1-hp/maxHp), pos.y, healthWidth*(1-hp/maxHp), 0, healthWidth*hp/maxHp, healthHeight, healthWidth*hp/maxHp, healthHeight);
+   
     }
     this.getBoundingBox = function() {return boundingBox;};
     this.getPos = function () {return pos;};
@@ -97,18 +86,31 @@ function Monster(data) {
     }
     
     this.goToRoom = function(operatingRoom, roomNumber) {
+	var game = GameController.getInstance();
         pos = operatingRoom.getPos();
-        operatingRoom.isOccupied = true;
+        //operatingRoom.isOccupied = true;
+        game.gold -= costToTreat;
+        operatingRoom.changeDoors(true);
         isInRoom = true;
     }
 }
 
 Monster.monsterFromRandom = function(pos) {
+    var raceIdx = Math.floor(Math.random()*Stats.raceDist.length);
+    var race = Stats.raceDist[raceIdx];
+    var illnessIdx = Math.floor(Math.random()*Stats.raceToIllnessDist[race].length);
+    var illness = Stats.raceToIllnessDist[race][illnessIdx];
+    var hpIdx = Math.floor(Math.random()*Stats.raceIllnessToHpDist[race][illness].length);
+    var hp = Stats.raceIllnessToHpDist[race][illness][hpIdx];
+    var cost = Stats.illnessToGoldDist[illness];
     var mons = new Monster({
-            race: "vampire",
-            illness: "bPoisoning",
-            x:pos.x,
-            y:pos.y
-        });
+        race: race,
+        illness: illness,
+        x:pos.x,
+        y:pos.y,
+        maxHp:30,
+        hp:hp,
+        cost:cost
+    });
     return mons;
 }
