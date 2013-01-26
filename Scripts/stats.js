@@ -1,6 +1,14 @@
 function Stats() {}
 
+Stats.startingGold = 250;
+Stats.startingPublicity = 50;
+Stats.startingSubscribers = 50;
 Stats.raceDist = ["vampire", "dragon", "werewolf"];
+
+Stats.healingSpeed = 15;
+Stats.dyingSpeed = 5;
+Stats.maxHp = 40;
+
 Stats.raceToIllnessDist = {
     "vampire" : ["toothache", "toothache", "bPoisoning", "cold", "cold", "cold"],
     "dragon" : ["cold", "cold", "cold", "congestion", "congestion", "cancer"],
@@ -9,19 +17,19 @@ Stats.raceToIllnessDist = {
 
 Stats.raceIllnessToHpDist = {
     "vampire" : {
-        "cold" : [15, 20, 25],
-	"toothache" : [10, 15, 20],
-	"bPoisoning" : [5, 10, 15]
+        "cold" : [25, 30, 35],
+	"toothache" : [20, 25, 30],
+	"bPoisoning" : [15, 20, 25]
     },
     "dragon" : {
-	"cold" : [15, 20, 25],
-	"congestion" : [10, 15, 20],
-	"cancer" : [5, 10, 15]
+	"cold" : [25, 30, 35],
+	"congestion" : [20, 25, 30],
+	"cancer" : [15, 20, 25]
     },
     "werewolf" : {
-	"cold" : [15, 20, 25],
-	"hairLoss" : [10, 15, 20],
-	"sPoisoning" : [5, 10, 15]
+	"cold" : [25, 30, 35],
+	"hairLoss" : [20, 25, 30],
+	"sPoisoning" : [15, 20, 25]
     }
 };
 
@@ -36,13 +44,13 @@ Stats.illnessToPubDist = {
 };
 
 Stats.illnessToGoldDist = {
-        "cold" : [1],
-	"toothache" : [2],
-	"bPoisoning" : [3],
-	"congestion" : [2],
-	"cancer" : [3],
-	"hairLoss" : [2],
-	"sPoisoning" : [3]
+        "cold" : [5, 5, 10],
+	"toothache" : [5, 10, 15],
+	"bPoisoning" : [15, 20, 25],
+	"congestion" : [5, 10, 15],
+	"cancer" : [15, 20, 25],
+	"hairLoss" : [5, 10, 15],
+	"sPoisoning" : [15, 20, 25]
 };
 
 Stats.applyResearch = function(researchName){
@@ -73,4 +81,15 @@ Stats.applyResearch = function(researchName){
             }
             break;
     }
+};
+
+Stats.operatingCost = 50;
+Stats.subscriberMultiplier = 2;
+Stats.subscriberChange = function(publicity) {
+    return Math.floor(publicity/10);
 }
+Stats.endTurnGoldChange = function(gold,publicity) {
+    gold -= Stats.operatingCost;
+    gold += (Stats.subscriberMultiplier * publicity);
+    return gold;
+};

@@ -12,7 +12,6 @@ $(function(){
     
     var game = GameController.getInstance();
     game.init(myCanvasController);
-    game.prepareLevel();
     game.start();
     
     //canvas = $("#myCanvas")[0];

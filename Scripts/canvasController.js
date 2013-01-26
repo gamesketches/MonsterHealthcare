@@ -12,6 +12,9 @@ function CanvasController(canvas) {
             context.drawImage(img,x,y);
         }
     }
+    this.drawBox = function(x,y,width,height){
+        context.strokeRect(x,y,width,height);
+    }
     this.drawText = function(text,font,fillStyle,x,y) {
         //var realX = x, realY = y, realWidth = width, realHeight = height;
         //if (lineWidth) {
@@ -25,7 +28,7 @@ function CanvasController(canvas) {
         //}
         context.fillStyle=fillStyle;
         context.font = font + "px Times";
-        context.fillText(text, x,y);
+        context.fillText(text, x,y+font);
         //var len = textArr.length;
         //for (var i=0; i<len; i++) {
         //    context.fillText(textArr[i], realX+realWidth/2, realY+realHeight/2 + font);//*(i+0.5-len/2));
