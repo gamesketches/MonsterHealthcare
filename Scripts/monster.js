@@ -5,24 +5,27 @@ function Monster(data) {
     var isInRoom = false;
     var imgSelected;
     var imgUnselected;
+    var hasSound = false;
     
     var costToTreat;
     var publicity;
     var maxHp;
     var hp;
     var frameCount = 0;
+    var isDyingCounter = 0;
     
     if (data) {
         imgUnselected = ImageResources.images[data.race][data.illness]["unselected"];
         imgSelected = ImageResources.images[data.race][data.illness]["selected"];
+	
+	if(Math.floor(Math.random()*5) == 0){
+	    SoundResources.sounds[data.race][data.illness].play();
+	    hasSound = true;
+	}
         hp = data.hp;
         maxHp = data.maxHp;
         costToTreat = data.cost;
         publicity = data.pub;
-    }
-    else {
-        imgUnselected = ImageResources.images["vampire"]["unselected"];
-        imgSelected = img;
     }
     
     var width = 150;
@@ -47,11 +50,23 @@ function Monster(data) {
         if (frameCount == fps) {
             var game = GameController.getInstance();
             frameCount = 0;
-            if (!isInRoom) {
+            if (isDyingCounter > 0 && isDyingCounter < 2) {
+                isDyingCounter++;
+            }
+            else if (isDyingCounter >= 2) {
+                return {remove:true};
+            }
+            else if (!isInRoom) {
                 hp -= Stats.dyingSpeed;
                 if (hp <= 0) {
                     // DIE
-                    game.publicity -= publicity*2;
+                    SoundResources.sounds[data.race]["death"].play();
+                    if (game.publicity > Stats.minPublicity) {
+                        game.publicity -= publicity*Stats.publicityPenaltyMultiplier;
+                    }
+                    isDyingCounter = true;
+                    this.isSelected = false;
+                    game.deadCountByRace[data.race]++;
                     return {dead:true};
                 }
             }
@@ -59,7 +74,10 @@ function Monster(data) {
                 hp += Stats.healingSpeed;
                 if (hp > maxHp) {
                     // HEAL
-                    game.publicity += publicity;
+                    if (game.publicity < Stats.maxPublicity) {
+                        game.publicity += publicity;
+                    }
+                    SoundResources.sounds["choir"].play();
                     return {healed:true};
                 }
             }
@@ -67,6 +85,14 @@ function Monster(data) {
         return null;
     }
     this.draw = function(canvas) {
+	if (hasSound){
+	    canvas.drawImg(ImageResources.images["speechbubble"], pos.x +width, pos.y);
+	}
+        if (isDyingCounter > 0) {
+            canvas.drawImg(imgUnselected, pos.x, pos.y);
+            canvas.drawImg(ImageResources.images["cross"],  pos.x, pos.y);
+            return;
+        }
         if (this.isSelected) {
             canvas.drawImg(imgSelected, pos.x, pos.y);
         }
@@ -74,19 +100,29 @@ function Monster(data) {
             canvas.drawImg(imgUnselected, pos.x, pos.y);
         }
         canvas.drawImg(ImageResources.images["health"], pos.x, pos.y+175, 0, 0, healthWidth*hp/maxHp, healthHeight, healthWidth*hp/maxHp, healthHeight);
+	//canvas.drawImg(ImageResources.images["arrowDown"], pos.x, pos.y - 20);
+	for (var i=0;i<Math.floor(costToTreat/15);i++){
+	    canvas.drawImg(ImageResources.images["costIcon"], pos.x + 15*(i), pos.y - 20);
+	}
+	for (var i=0;i<publicity;i++){
+	    canvas.drawImg(ImageResources.images["prIcon"], pos.x + width - 20*i, pos.y - 20);
+	}
    //canvas.drawImg(ImageResources.images["health"], pos.x+healthWidth*(1-hp/maxHp), pos.y, healthWidth*(1-hp/maxHp), 0, healthWidth*hp/maxHp, healthHeight, healthWidth*hp/maxHp, healthHeight);
 	canvas.drawBox(pos.x, pos.y+175, healthWidth, healthHeight);
-        canvas.drawText(costToTreat,25,"orange",pos.x,pos.y-30);
-        canvas.drawText(publicity,25,"green",pos.x+width,pos.y-30);
+        //canvas.drawText(costToTreat,25,"orange",pos.x,pos.y-30);
+        //canvas.drawText(publicity,25,"green",pos.x+width,pos.y-30);
     }
     this.getBoundingBox = function() {return boundingBox;};
     this.getPos = function () {return pos;};
     this.handleMouseDown = function(isClicked, pos) {
+        if (isDyingCounter > 0 || isInRoom) {
+            return;
+        }
         this.isSelected = isClicked;
         if (isClicked) {
             console.log("Monster clicked!!!");
-	    SoundResources.sounds["click"].volume = 0.1;
             SoundResources.sounds["click"].play();
+	    SoundResources.sounds["click"].volume = 0.05;
         }
     }
     this.handleMouseHover = function(pos) {
@@ -104,6 +140,7 @@ function Monster(data) {
         game.gold -= costToTreat;
         operatingRoom.changeDoors(true);
         isInRoom = true;
+        this.isSelected = false;
     }
 }
 

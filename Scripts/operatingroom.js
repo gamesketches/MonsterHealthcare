@@ -1,8 +1,8 @@
 function OperatingRoom(data) {
     var openimg = new Image();
-    openimg.src = "Placeholder Images/ORDoorsOpenPlace.png";
+    openimg.src = "Resources/Art/OpRoomOpen.png";
     var closedimg = new Image();
-    closedimg.src = "Placeholder Images/ORDoorsPlace.png";
+    closedimg.src = "Resources/Art/OpRoomClosed.png";
     var isOpen = false;
     var imgOpen;
     var imgClosed;
@@ -16,7 +16,7 @@ function OperatingRoom(data) {
     }
     
     var width = 350;
-    var height = 200;
+    var height = 300;
     var pos = {
         x:data?data.x:300,
         y:data?data.y:300

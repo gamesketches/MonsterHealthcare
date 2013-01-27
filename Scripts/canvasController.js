@@ -1,5 +1,6 @@
 function CanvasController(canvas) {
     var context = canvas.getContext("2d");
+    var isDragging;
     
     this.clear = function() {
         context.clearRect(0,0,canvas.width, canvas.height);
@@ -12,7 +13,9 @@ function CanvasController(canvas) {
             context.drawImage(img,x,y);
         }
     }
-    this.drawBox = function(x,y,width,height){
+    this.drawBox = function(x,y,width,height,color){
+        color = color || "black";
+        context.strokeStyle = color;
         context.strokeRect(x,y,width,height);
     }
     this.drawText = function(text,font,fillStyle,x,y) {
@@ -38,11 +41,20 @@ function CanvasController(canvas) {
     
     canvas.addEventListener("mousedown", function(e) {
         GameController.getInstance().handleMouseDown(getMouse(e));
+        isDragging = true;
     });
-    canvas.addEventListener("mousemove", function(e) {
-        GameController.getInstance().handleMouseHover(getMouse(e));
+    //canvas.addEventListener("mousemove", function(e) {
+    $(document).mousemove(function(e) {
+        if (!isDragging) {
+            GameController.getInstance().handleMouseHover(getMouse(e));
+        }
+        else {
+            GameController.getInstance().handleMouseDrag(getMouse(e));
+        }
     });
-    
+    $(document).mouseup(function(e) {
+        isDragging = false;
+    });
     
     // Private methods
     function getMouse(e) {
